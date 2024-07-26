@@ -4,7 +4,7 @@ let sidebarModules = null;
 
 let fullToolbarWidth = 0;
 
-function initializeEditor() {
+function initializeEditor(currentMetaData) {
   registerSelectionEventHandlers();
 
   renderToolbar(toolbarButtons = [
@@ -20,6 +20,7 @@ function initializeEditor() {
     new UndoButton(),
     new SelectModeButton(),
     new ZoomOutButton(),
+    new ToggleDisplayButton(),
 
     new ToolbarDivider(),
 
@@ -40,7 +41,13 @@ function initializeEditor() {
 
     new ToolbarDivider(),
 
-    new GroupButton()
+    new GroupButton(),
+
+    new ToolbarDivider(),
+
+    new TutorialsButton(),
+    new WikiButton()
+    
   ]);
 
   renderDragToolbar(dragToolbarButtons = [
@@ -51,6 +58,8 @@ function initializeEditor() {
     new CloneDragButton(),
     new SpacingDragButton(),
     new RotateDragButton(),
+    new ResizeDragButton(false),
+    new ResizeDragButton(true),
     new MoveDragButton()
   ]);
 
@@ -64,7 +73,17 @@ function initializeEditor() {
     new ToolboxModule()
   ]);
 
+  onMessage('meta', metaReceived);
+  metaReceived(currentMetaData);
+
   openEditor();
+}
+
+function metaReceived(data) {
+  for(const module of sidebarModules)
+    module.onMetaReceived(data);
+  for(const button of toolbarButtons)
+    button.onMetaReceived(data);
 }
 
 export function openEditor() {
@@ -80,6 +99,8 @@ function closeEditor() {
 
   for(const module of sidebarModules)
     module.onEditorClose();
+  for(const button of toolbarButtons)
+    button.onEditorClose();
 
   $('#activeGameButton').click();
   setScale();
